@@ -5,8 +5,8 @@ import java.net.URISyntaxException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import org.json.JSONObject;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -17,8 +17,6 @@ import com.example.demo.service.RestApiService;
 
 @SpringBootApplication
 public class DemoApplication {
-//	@Autowired
-//	RestApiService restApiService;
 
 	public static void main(String[] args) {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
@@ -26,20 +24,22 @@ public class DemoApplication {
 		context.refresh();
 		RestApiService restApiService = context.getBean(RestApiService.class);
 		CoffeeMachineService coffeeMachineService = context.getBean(CoffeeMachineService.class);
-//		Machine machine = null;
-		Map<String, JSONObject> listOfBeverageDetails = new HashMap<>();
 		JSONObject jsonObject = null;
+		
 		try {
-//			jsonObject = restApiService.getRequestJson();
-//			JSONObject machine = jsonObject.getJSONObject("machine");   // to get complete json
-//			JSONObject beverages = machine.getJSONObject("beverages");  // to fetch beverages
-//			JSONObject totalItemsQuatities = machine.getJSONObject("total_items_quantity");
-			String[] userInput = new String[95];
-			for(int i=0;i<90;i+=2) {
-				userInput[i]="hot_tea";
-			}
-			for(int i=1;i<90;i+=2) {
-				userInput[i]="hot_coffee";
+			/*
+			 * userInput[] is storing random beverages
+			 * among {"hot_tea","hot_coffee", "black_tea", "green_tea"}
+			 * 
+			 */
+			
+			Random rand = new Random();
+			String[] drinks = new String[] {"hot_tea","hot_coffee", "black_tea", "green_tea"};
+			
+			String[] userInput = new String[100];
+			for(int i=0;i<100;i++) {
+				int rand_int = rand.nextInt(100);
+				userInput[i] = drinks[rand_int%4];
 			}
 			
 			jsonObject = restApiService.getRequestJson();
@@ -52,15 +52,12 @@ public class DemoApplication {
 			Map<String, Object> mapOfTotalQuantity = machine.getJSONObject("total_items_quantity").toMap();
 			
 			coffeeMachineService.startMachine(mapOfBeverages, mapOfTotalQuantity, numberOfOutlets, userInput);
-		
-			//System.out.println("Total number of Outlet: " + machine.getOutlets().getCountN());
+			
 		} catch (KeyManagementException | NoSuchAlgorithmException | KeyStoreException | URISyntaxException
 				| IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		//coffeeMachineService.startMachine(machine);
-		//SpringApplication.run(DemoApplication.class, args);
+		
 		context.close();
 	}
 

@@ -18,7 +18,6 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,8 +32,12 @@ public class RestApiServiceImpl implements RestApiService {
 		objectMapper = new ObjectMapper();
 	}
 
-	public JSONObject getRequestJson() throws URISyntaxException,ClientProtocolException, IOException, KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
-		//ResponseData responseData = null;
+	/* 
+	 * This function returns the jsonObject from the url.
+	 * */
+	
+	public JSONObject getRequestJson() throws URISyntaxException,ClientProtocolException, 
+					IOException, KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
 		CloseableHttpClient httpclient = HttpClients
 //				.createDefault();
 				.custom()
@@ -50,13 +53,12 @@ public class RestApiServiceImpl implements RestApiService {
 			HttpEntity entity = response.getEntity();
 			String apiOutput = EntityUtils.toString(entity);
 			
-			json = new JSONObject(apiOutput); // .parse("{\"name\":\"MyNode\", \"width\":200, \"height\":100}");
-			//System.out.println("name=" + json.get("name"));
-			//System.out.println("width=" + json.get("width"));
+			json = new JSONObject(apiOutput);
 			
 			EntityUtils.consume(entity);
 		}
 		response.close();
+		
 		return json;
 	}
 }

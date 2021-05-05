@@ -4,8 +4,6 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
-
-
 @Service
 public class CoffeeMachineServiceImpl implements CoffeeMachineService {
 	
@@ -17,11 +15,17 @@ public class CoffeeMachineServiceImpl implements CoffeeMachineService {
 		this.mapOfTotalQuantity=mapOfTotalQuantity;
 	}
 	
+	/*
+	 * This function is synchronized
+	 * checks if given beverage can be made. if yes, then it makes that drink
+	 * Also, reduces the used ingredients from the total ingredients
+	 * Also, It handles insufficient and unavailability of any ingredient
+	 * 
+	 */
+	
 	public synchronized void makeDemandedDrink(String input) {
-		//System.out.println(Thread.currentThread().getName());
 		String result = null;
 		boolean flag = false;
-		//System.out.println("Processing " + this.input);
 		if(this.mapOfBeverage.containsKey(input)) {
 			Map<String, Object> recipe = (Map<String, Object>) this.mapOfBeverage.get(input);
 			for(Map.Entry<String, Object> entry : recipe.entrySet()) {
@@ -36,7 +40,6 @@ public class CoffeeMachineServiceImpl implements CoffeeMachineService {
 						break;
 					}
 				} else {
-					// TODO
 					result = input + " cannot be prepared because " + entry.getKey() + " is not available";
 					System.out.println(result);
 					flag = true;
@@ -44,20 +47,17 @@ public class CoffeeMachineServiceImpl implements CoffeeMachineService {
 				}
 			}
 			if(!flag) {
-				//System.out.println("Available Quantity");
 				for(Map.Entry<String, Object> entry : recipe.entrySet()) {
 					int oldQuantity = (int) this.mapOfTotalQuantity.get(entry.getKey());
 					int requiredQuantity = (int) entry.getValue();
 					
 					this.mapOfTotalQuantity.replace(entry.getKey(), (oldQuantity - requiredQuantity)>=0?oldQuantity - requiredQuantity:0);
-					System.out.println(entry.getKey() + "=" + this.mapOfTotalQuantity.get(entry.getKey()));
 					
 				}
 				result = input +  " is prepared";
 				System.out.println(result);
 			}
 		}
-		//return result;
 	}
 
     
@@ -74,18 +74,19 @@ public class CoffeeMachineServiceImpl implements CoffeeMachineService {
 	
 		@Override
 		public void run() {
-			//System.out.println(this.vendingMachine.makeDemandedDrink());
 			this.vendingMachine.makeDemandedDrink(this.input);
 		}
 		
 	}
 
-	public void startMachine(Map<String, Object> mapOfBeverage, Map<String, Object> mapOfTotalQuantity, int outlets, String[] userInput) {
+	public void startMachine(Map<String, Object> mapOfBeverage, Map<String, Object> mapOfTotalQuantity, 
+						int outlets, String[] userInput) {
 		VendingMachine vendingMachine =  new VendingMachine(mapOfBeverage,mapOfTotalQuantity);
 		int totalBeveragesWanted=userInput.length;
+		outlets= 1;
 		Thread[] threads = new Thread[outlets];
 		ResourceMachine[] resourceMachine = new ResourceMachine[outlets];
-		 for (int i = 0; i < totalBeveragesWanted;) {
+		 for (int i = 0; i <= totalBeveragesWanted-outlets;) {
 			 for(int j = 0;j<outlets;j++) {
 				 resourceMachine[j] = new ResourceMachine(vendingMachine,userInput[i++]); 
 				 threads[j] = new Thread(resourceMachine[j]);
